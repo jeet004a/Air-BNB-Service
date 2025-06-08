@@ -66,13 +66,11 @@ export const signInController = async(req, res, next) => {
 
 export const userProfile = async(req, res, next) => {
     try {
-        // console.log(req.body)
         console.log(req.user)
         return res.status(200).json({
             success: true,
             message: "User profile fetched successfully",
             user: req.user.email
-                // user: req.user
         })
     } catch (error) {
         console.log('error in userProfile:', error);

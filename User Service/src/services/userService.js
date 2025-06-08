@@ -8,14 +8,12 @@ import bcrypt from 'bcrypt';
 export const userSignUpService = async(payload) => {
     try {
         const newUser = await userDB.insert(User).values({
-                firstname: payload.userDetails.firstname,
-                lastname: payload.userDetails.lastname,
-                email: payload.userDetails.email,
-                password: payload.password,
-                salt: payload.salt
-            })
-            // const token = await generateToken({ email: payload.userDetails.email })
-            // console.log(newUser)
+            firstname: payload.userDetails.firstname,
+            lastname: payload.userDetails.lastname,
+            email: payload.userDetails.email,
+            password: payload.password,
+            salt: payload.salt
+        })
         if (newUser.rowCount > 0) {
             const token = await generateToken({ email: payload.userDetails.email })
             return token
@@ -34,8 +32,6 @@ export const userSignInService = async(payload) => {
             console.log('token:', token)
             return token
         }
-        // console.log('existingUser:', existingUser[0].password)
-        // console.log('passwordCheck:', passwordCheck)
     } catch (error) {
         console.log('error in userSignInService:', error);
     }
