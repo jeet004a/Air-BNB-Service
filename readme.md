@@ -2,7 +2,11 @@
 
 This project is the **User Service** for an AirBnB-like platform. It provides RESTful APIs for user authentication, registration, and profile management. The backend is built using Node.js, Express, Drizzle ORM (with PostgreSQL), and JWT for authentication.
 
+# Backend Design
+![image alt](https://github.com/jeet004a/Air-BNB-Service/blob/e862467afdb422fdaaf2a95107439d0b125bf3c4/airbnb.png)
+
 ## API Endpoints & Their Working
+
 
 Below are all user-related endpoints, their request/response formats, and how they work:
 
