@@ -8,6 +8,34 @@
       "when": 1749485052602,
       "tag": "0000_low_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749576807046,
+      "tag": "0001_fresh_thundra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749577170762,
+      "tag": "0002_supreme_karen_page",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749578652298,
+      "tag": "0003_blue_slapstick",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749579669374,
+      "tag": "0004_odd_caretaker",
+      "breakpoints": true
     }
   ]
 }

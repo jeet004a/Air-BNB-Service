@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, integer } from 'drizzle-orm/pg-core'
+import { pgTable, serial, varchar, text, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core'
 
 export const manager = pgTable('manager', {
     id: serial('id').primaryKey(),
@@ -15,18 +15,23 @@ export const hotel = pgTable('hotel', {
     id: serial('id').primaryKey(),
     name: varchar('name', { length: 255 }).notNull(),
     description: varchar('description', { length: 255 }).notNull(),
-    address: varchar('description', { length: 255 }).notNull(),
+    address: varchar('address', { length: 255 }).notNull(),
     city: varchar('city', { length: 255 }).notNull(),
     country: varchar('country', { length: 255 }).notNull(),
+    pincode: varchar('pincode', { length: 10 }).notNull(),
+    roomCapacity: integer('room_capacity').notNull().default(0),
     hostId: integer('host_id').references(() => manager.id, { onDelete: 'cascade' }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 })
 
+// Define the enum for room type
+export const roomTypeEnum = pgEnum("room_type_enum", ["single", "double", "family"]);
+
 export const room = pgTable('room', {
     id: serial('id').primaryKey(),
     hotelId: integer('hotel_id').references(() => hotel.id, { onDelete: 'cascade' }).notNull(),
-    roomType: varchar('room_type', { length: 255 }).notNull(),
+    roomType: roomTypeEnum('room_type').notNull(),
     PPN: integer('ppn').notNull(),
     max_guests: integer('max_guests').notNull(),
     description: text('description').notNull(),

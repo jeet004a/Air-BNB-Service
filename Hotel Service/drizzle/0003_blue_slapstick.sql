@@ -1,0 +1,1 @@
+ALTER TABLE "hotel" ADD COLUMN "room_capacity" integer DEFAULT 0 NOT NULL;
