@@ -27,6 +27,7 @@ export const hotel = pgTable('hotel', {
 
 // Define the enum for room type
 export const roomTypeEnum = pgEnum("room_type_enum", ["single", "double", "family"]);
+export const roomBookedStatus = pgEnum("room_booked_status_enum", ["available", "booked", "maintenance"]);
 
 export const room = pgTable('room', {
     id: serial('id').primaryKey(),

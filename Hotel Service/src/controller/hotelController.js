@@ -1,7 +1,8 @@
 import { ManagerDB, HotelDB } from '../DB/dbConnection.js'
 import { manager, hotel } from '../schema/hotelSchema.js'
 import { eq, sql } from 'drizzle-orm'
-import { createHotelService } from '../services/hotelService.js'
+import { createHotelService, updateRoomCapacityService } from '../services/hotelService.js'
+
 export const createHotelContoller = async(req, res, next) => {
     try {
         const existingManager = await ManagerDB.select().from(manager).where(eq(manager.email, req.user.email))
@@ -54,5 +55,22 @@ export const getAllHotelsContoller = async(req, res, next) => {
         })
     } catch (error) {
         console.log('Error in getAllHotelsContoller:', error);
+    }
+}
+
+
+export const updateRoomCapacityContoller = async(req, res, next) => {
+    try {
+        const hotelId = req.params.id
+        const { roomCapacity } = req.body
+        const response = await updateRoomCapacityService({ hotelId, roomCapacity })
+        return res.status(200).json({
+            success: true,
+            message: 'Room capacity updated successfully',
+            updateStatus: response
+        })
+
+    } catch (error) {
+        console.log('Error in updateRoomCapacityContoller:', error);
     }
 }

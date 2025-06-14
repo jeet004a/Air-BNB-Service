@@ -1,0 +1,2 @@
+CREATE TYPE "public"."room_booked_status_enum" AS ENUM('available', 'booked', 'maintenance');--> statement-breakpoint
+ALTER TABLE "room" ADD COLUMN "room_booked_status" "room_booked_status_enum" DEFAULT 'available' NOT NULL;

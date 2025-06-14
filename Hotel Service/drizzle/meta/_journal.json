@@ -36,6 +36,20 @@
       "when": 1749579669374,
       "tag": "0004_odd_caretaker",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1749893038867,
+      "tag": "0005_wet_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1749893160253,
+      "tag": "0006_shocking_luckman",
+      "breakpoints": true
     }
   ]
 }

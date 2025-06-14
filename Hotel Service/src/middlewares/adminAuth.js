@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { validateSignature } from '../utils/adminUtils.js';
-export const userAuth = async(req, res, next) => {
+export const adminAuth = async(req, res, next) => {
     try {
         const user = await validateSignature(req)
         if (!user) {

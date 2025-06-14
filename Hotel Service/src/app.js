@@ -2,6 +2,7 @@ import express from 'express'
 import { config } from 'dotenv'
 import adminRoutes from './routes/adminRoutes.js'
 import hotelRoutes from './routes/hotelRoutes.js'
+import roomRoutes from './routes/roomRoutes.js'
 config()
 const PORT = process.env.PORT || 3002
 const app = express()
@@ -23,8 +24,11 @@ app.use(express.json())
 //admin routes
 app.use('/api/v1/admin', adminRoutes)
 
-//Admin routes
+//Admin hotel routes
 app.use('/api/v1/hotel', hotelRoutes)
+
+//Hotel room routers
+app.use('/api/v1/room', roomRoutes)
 
 app.listen(PORT, () => {
     console.log(`Search Service is running on port ${PORT}`)

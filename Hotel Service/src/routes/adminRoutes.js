@@ -1,6 +1,6 @@
 import express from 'express'
 import { adminSignUpController, adminSignInController, adminProfileController } from '../controller/adminController.js'
-import { userAuth } from '../middlewares/adminAuth.js'
+import { adminAuth } from '../middlewares/adminAuth.js'
 import { body } from 'express-validator'
 const router = express.Router()
 
@@ -11,6 +11,6 @@ router.post('/signup', body('email').isEmail().withMessage('Invalid Email Id'),
 
 router.get('/signin', adminSignInController)
 
-router.get('/profile', userAuth, adminProfileController)
+router.get('/profile', adminAuth, adminProfileController)
 
 export default router
