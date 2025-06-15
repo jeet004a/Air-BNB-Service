@@ -217,9 +217,7 @@ Stores images for each room.
 This schema supports a flexible and scalable hotel management system for the AirBnB backend.
 
 
-## Hotel Service API Endpoints & Their Working
-
-Below are all hotel admin-related endpoints, their request/response formats, and how they work:
+## Admin Service API Endpoints & Their Working
 
 ---
 
@@ -338,42 +336,272 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## Example Usage
+## Hotel Service API Endpoints & Their Working
 
-### Sign Up
+---
 
-```bash
-curl -X POST http://localhost:3001/api/v1/admin/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","password":"yourpassword","name":"Hotel Manager","phone":"1234567890"}'
+### 1. **Create Hotel (Admin Only)**
+
+**Endpoint:**  
+`POST /api/v1/hotel/create`
+
+**How it works:**
+- Requires a valid JWT token in the `Authorization` header (admin only).
+- Accepts hotel details (`name`, `description`, `address`, `city`, `country`, `pincode`, `roomCapacity`) in the request body.
+- Associates the hotel with the authenticated admin.
+- Returns the created hotel details on success.
+
+**Request Example:**
+```json
+{
+  "name": "Hotel Paradise",
+  "description": "A luxury hotel in the city center.",
+  "address": "123 Main St",
+  "city": "Metropolis",
+  "country": "Wonderland",
+  "pincode": "123456",
+  "roomCapacity": 10
+}
 ```
 
-### Sign In
-
-```bash
-curl -X GET "http://localhost:3001/api/v1/admin/signin?email=admin@example.com&password=yourpassword"
+**Headers:**
+```
+Authorization: Bearer <JWT_TOKEN>
 ```
 
-### Get Profile
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Hotel created successfully",
+  "details": {
+    "id": 1,
+    "name": "Hotel Paradise",
+    "description": "A luxury hotel in the city center.",
+    "address": "123 Main St",
+    "city": "Metropolis",
+    "country": "Wonderland",
+    "pincode": "123456",
+    "roomCapacity": 10,
+    "hostId": 1,
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+}
+```
 
-```bash
-curl -X GET http://localhost:3001/api/v1/admin/profile \
-  -H "Authorization: Bearer <JWT_TOKEN>"
+**Failure Response:**
+```json
+{
+  "success": false,
+  "message": "Hotel already exists for this manager or this email id"
+}
 ```
 
 ---
 
+### 2. **Update Room Capacity (Admin Only)**
 
-## All API Endpoints Overview
+**Endpoint:**  
+`PATCH /api/v1/hotel/update/:id`
 
-Below is a summary table of all User Service and Hotel Admin Service API endpoints, their methods, required body/headers, and a brief description for frontend integration:
+**How it works:**
+- Requires a valid JWT token in the `Authorization` header (admin only).
+- Accepts `roomCapacity` in the request body.
+- Updates the room capacity for the specified hotel.
 
-| Endpoint                        | Method | Body/Headers                                   | Description                                      |
-|----------------------------------|--------|------------------------------------------------|--------------------------------------------------|
-| /api/v1/admin/signup            | POST   | JSON: email, password, name, phone             | Register a new hotel admin (manager)             |
-| /api/v1/admin/signin            | GET    | Query: email, password                         | Authenticate hotel admin and get JWT             |
-| /api/v1/admin/profile           | GET    | Header: Authorization: Bearer <JWT_TOKEN>      | Get current hotel admin's profile                |
+**Request Example:**
+```json
+{
+  "roomCapacity": 15
+}
+```
+
+**Headers:**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Room capacity updated successfully",
+  "updateStatus": "Now remaining room capacity 10 becuase your already listed 5 number of rooms"
+}
+```
 
 ---
 
-**All endpoints return clear success/failure messages and use standard HTTP status codes. Frontend developers should use the JWT token returned from sign up/sign in for all protected routes.**
+### 3. **Get All Hotels**
+
+**Endpoint:**  
+`GET /api/v1/hotel/getAllHotels?limit=10&page=1`
+
+**How it works:**
+- Returns a paginated list of all hotels.
+- Accepts `limit` and `page` as query parameters.
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "All hotels fetched successfully",
+  "recordCount": [{ "count": 20 }],
+  "prevPage": 0,
+  "nextPage": 10,
+  "details": [
+    {
+      "id": 1,
+      "name": "Hotel Paradise",
+      "description": "...",
+      "address": "...",
+      "city": "...",
+      "country": "...",
+      "pincode": "...",
+      "roomCapacity": 10,
+      "hostId": 1,
+      "createdAt": "...",
+      "updatedAt": "..."
+    }
+    // ...more hotels
+  ]
+}
+```
+
+---
+
+## Room Service API Endpoints & Their Working
+
+---
+
+### 1. **Create Room (Admin Only)**
+
+**Endpoint:**  
+`POST /api/v1/room/create`
+
+**How it works:**
+- Requires a valid JWT token in the `Authorization` header (admin only).
+- Accepts room details (`roomType`, `PPN`, `max_guests`, `description`) in the request body.
+- Associates the room with the admin's hotel.
+- Decreases hotel room capacity by 1 if successful.
+
+**Request Example:**
+```json
+{
+  "roomType": "single",
+  "PPN": 100,
+  "max_guests": 2,
+  "description": "Cozy single room"
+}
+```
+
+**Headers:**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Room created successfully with id: 5"
+}
+```
+
+**Failure Response (e.g., no capacity):**
+```json
+{
+  "success": false,
+  "message": "No room capacity left or room creation failed"
+}
+```
+
+---
+
+### 2. **Get All Rooms for Admin (Admin Only)**
+
+**Endpoint:**  
+`GET /api/v1/room/admin/all`
+
+**How it works:**
+- Requires a valid JWT token in the `Authorization` header (admin only).
+- Returns all rooms for the authenticated admin's hotel(s).
+
+**Headers:**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "fetched successfully",
+  "response": [
+    {
+      "id": 1,
+      "hotelId": 1,
+      "roomType": "single",
+      "PPN": 100,
+      "max_guests": 2,
+      "description": "Cozy single room",
+      "createdAt": "...",
+      "updatedAt": "..."
+    }
+    // ...more rooms
+  ]
+}
+```
+
+---
+
+### 3. **Get All Rooms (Public)**
+
+**Endpoint:**  
+`GET /api/v1/room/all`
+
+**How it works:**
+- Returns all rooms across all hotels.
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "All rooms fetched successfully",
+  "response": [
+    {
+      "id": 1,
+      "hotelId": 1,
+      "roomType": "single",
+      "PPN": 100,
+      "max_guests": 2,
+      "description": "Cozy single room",
+      "createdAt": "...",
+      "updatedAt": "..."
+    }
+    // ...more rooms
+  ]
+}
+```
+
+---
+
+## API Endpoints Table
+
+| Endpoint                                 | Method | Body/Headers                                   | Description                                      |
+|-------------------------------------------|--------|------------------------------------------------|--------------------------------------------------|
+| /api/v1/auth/signup                      | POST   | JSON: email, password, firstname, lastname     | Register a new user                              |
+| /api/v1/auth/signin                      | POST   | JSON: email, password                          | Authenticate user and get JWT                    |
+| /api/v1/auth/profile                     | GET    | Header: Authorization: Bearer <JWT_TOKEN>      | Get current user's profile (email)               |
+| /api/v1/admin/signup                     | POST   | JSON: email, password, name, phone             | Register a new hotel admin (manager)             |
+| /api/v1/admin/signin                     | GET    | Query: email, password                         | Authenticate hotel admin and get JWT             |
+| /api/v1/admin/profile                    | GET    | Header: Authorization: Bearer <JWT_TOKEN>      | Get current hotel admin's profile                |
+| /api/v1/hotel/create                     | POST   | JSON: hotel details, Header: Bearer <JWT_TOKEN>| Create a new hotel (admin only)                  |
+| /api/v1/hotel/update/:id                 | PATCH  | JSON: roomCapacity, Header: Bearer <JWT_TOKEN> | Update room capacity for a hotel (admin only)    |
+| /api/v1/hotel/getAllHotels               | GET    | Query: limit, page                             | Get all hotels (paginated)                       |
+| /api/v1/room/create                      | POST   | JSON: room details, Header: Bearer <JWT_TOKEN> | Create a new room for admin's hotel              |
+| /api/v1/room/admin/all                   | GET    | Header: Authorization: Bearer <JWT_TOKEN>      | Get all rooms for admin's hotel(s)               |
+| /api/v1/room/all                         | GET    |                                                | Get all
+
+**All endpoints return clear success/failure messages and use standard HTTP status codes. Frontend developers should use the JWT token returned from sign up/sign in for**

@@ -1,0 +1,1 @@
+ALTER TABLE "room" DROP COLUMN "room_booked_status";

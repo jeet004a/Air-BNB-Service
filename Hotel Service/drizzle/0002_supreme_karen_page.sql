@@ -1,0 +1,1 @@
+ALTER TABLE "hotel" ADD COLUMN "address" varchar(255) NOT NULL;

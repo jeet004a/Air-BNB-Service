@@ -1,0 +1,2 @@
+CREATE TYPE "public"."room_type_enum" AS ENUM('single', 'double', 'family');--> statement-breakpoint
+ALTER TABLE "room" ALTER COLUMN "room_type" SET DATA TYPE "public"."room_type_enum" USING "room_type"::"public"."room_type_enum";

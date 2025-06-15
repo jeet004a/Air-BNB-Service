@@ -4,6 +4,7 @@ import { userSignUpService, userSignInService } from '../services/userService.js
 import { User } from '../DB/userSchema.js'
 import { userDB } from '../DB/dbConnection.js'
 import { eq } from 'drizzle-orm'
+import { userAcivityLogger } from '../logger/userActivityLogger.js'
 export const signUpController = async(req, res, next) => {
     try {
         const errors = validationResult(req)
@@ -16,7 +17,9 @@ export const signUpController = async(req, res, next) => {
         }
 
         const existingUser = await userDB.select().from(User).where(eq(User.email, req.body.email))
-        if (existingUser) {
+            // console.log(existingUser)
+        if (existingUser.length > 0) {
+            userAcivityLogger.error(`User already exists with this email ${req.body.email}`)
             return res.status(400).json({
                 success: false,
                 message: "User already exists with this email",
@@ -47,6 +50,7 @@ export const signInController = async(req, res, next) => {
         }
         const existingUser = await userDB.select().from(User).where(eq(User.email, req.body.email))
         if (!existingUser || existingUser.length === 0) {
+            userAcivityLogger.error(`User does not exist with this email ${req.body.email}`)
             return res.status(400).json({
                 success: false,
                 message: "User does not exist with this email",

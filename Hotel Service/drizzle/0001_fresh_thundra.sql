@@ -1,0 +1,1 @@
+ALTER TABLE "hotel" ADD COLUMN "pincode" varchar(10) NOT NULL;

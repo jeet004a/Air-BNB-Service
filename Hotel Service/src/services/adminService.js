@@ -30,7 +30,7 @@ export const adminSignInService = async(payload) => {
         const passwordCheck = await bcrypt.hash(payload.password, existingAdmin[0].salt)
         if (existingAdmin[0].password === passwordCheck) {
             const token = await generateToken({ email: payload.email })
-            console.log('token:', token)
+                // console.log('token:', token)
             return token
         }
         return null
