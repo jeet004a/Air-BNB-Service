@@ -1,0 +1,1 @@
+ALTER TABLE "booking_details" DROP CONSTRAINT "booking_details_user_id_unique";

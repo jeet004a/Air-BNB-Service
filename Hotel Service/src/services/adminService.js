@@ -28,8 +28,9 @@ export const adminSignInService = async(payload) => {
     try {
         const existingAdmin = await ManagerDB.select().from(manager).where(eq(manager.email, payload.email))
         const passwordCheck = await bcrypt.hash(payload.password, existingAdmin[0].salt)
+            // console.log(existingAdmin)
         if (existingAdmin[0].password === passwordCheck) {
-            const token = await generateToken({ email: payload.email })
+            const token = await generateToken({ email: payload.email, admin_id: existingAdmin[0].id })
                 // console.log('token:', token)
             return token
         }

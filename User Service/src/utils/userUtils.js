@@ -17,7 +17,7 @@ export const validateSignature = async(req) => {
             if (req.rawHeaders[i].split(" ")[0] === 'Bearer') {
                 const token = req.rawHeaders[i].split(" ")[1]
                 const payload = await jwt.verify(token, process.env.JWT_SECRET)
-                    // console.log('abc',payload)
+                    // console.log('abc', payload)
                     // console.log("req")
                 req.user = payload
                 return true

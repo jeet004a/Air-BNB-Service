@@ -2,7 +2,9 @@ import express from 'express'
 import userRoutes from './routes/userRoutes.js'
 import cors from 'cors'
 const app = express()
-
+import { config } from 'dotenv'
+config()
+const PORT = process.env.PORT || 3001
 
 app.get('/', (req, res, next) => {
     try {
@@ -19,6 +21,10 @@ app.use(cors())
 app.use('/api/v1', userRoutes)
 
 
-app.listen(3001, () => {
-    console.log('User Service is running on port 3001')
+process.on('uncaughtException', err => {
+    console.error('Uncaught Exception:', err);
+});
+
+app.listen(PORT, () => {
+    console.log(`User Service is running on port ${PORT}`)
 })

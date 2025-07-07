@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { userSignUpService, userSignInService } from '../services/userService.js';
 import { User } from '../DB/userSchema.js'
 import { userDB } from '../DB/dbConnection.js'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { userAcivityLogger } from '../logger/userActivityLogger.js'
 export const signUpController = async(req, res, next) => {
     try {
@@ -70,11 +70,13 @@ export const signInController = async(req, res, next) => {
 
 export const userProfile = async(req, res, next) => {
     try {
-        console.log(req.user)
+        const userDetails = await userDB.execute(sql `select * from users where email=${req.user.email} `)
+            // console.log()
         return res.status(200).json({
             success: true,
             message: "User profile fetched successfully",
-            user: req.user.email
+            user: req.user.email,
+            userDetails: userDetails.rows[0]
         })
     } catch (error) {
         console.log('error in userProfile:', error);

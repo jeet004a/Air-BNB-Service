@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, serial, varchar, text, timestamp, integer, pgEnum, date } from 'drizzle-orm/pg-core'
 
 export const manager = pgTable('manager', {
     id: serial('id').primaryKey(),
@@ -44,6 +44,18 @@ export const roomImages = pgTable('room_images', {
     id: serial('id').primaryKey(),
     roomId: integer('room_id').references(() => room.id, { onDelete: 'cascade' }).notNull(),
     imageUrl: varchar('image_url', { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+})
+
+
+export const bookingDetails = pgTable('booking_details', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    hotelId: integer('hotel_id').references(() => hotel.id, { onDelete: 'cascade' }).notNull(),
+    roomId: integer('room_id').references(() => room.id, { onDelete: 'cascade' }).notNull(),
+    checkIn: date('check_in').notNull(),
+    checkOut: date('check_out').notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 })
