@@ -1,0 +1,1 @@
+ALTER TABLE "booking_details" RENAME COLUMN "chcek_out" TO "check_out";

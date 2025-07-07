@@ -36,7 +36,9 @@ export const createHotelContoller = async(req, res, next) => {
 
 export const getAllHotelsContoller = async(req, res, next) => {
     try {
-        console.log(req.query.limit, req.query.page)
+        // console.log(req.query.limit, req.query.page)
+        let limit = req.query.limit
+        let page = req.query.page
             // const hotels = await HotelDB.select({ count: sql `count(*)` }).from(hotel)
         const hotelCount = await HotelDB.execute(sql `select count(*) from hotel`)
         let prev = (page - 1) * limit
