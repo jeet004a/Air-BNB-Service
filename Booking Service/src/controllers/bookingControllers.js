@@ -1,4 +1,4 @@
-import { getAllOrder, adminhotelBookingDetailsService, userHotelBookingDetailsService } from '../services/bookingService.js'
+import { getAllOrder, adminhotelBookingDetailsService, userHotelBookingDetailsService, paymentStatusUpdateService } from '../services/bookingService.js'
 import { adminRoomCheckValidation } from '../utils/apiCalls/adminRoomCheckApiCall.js'
 
 
@@ -81,5 +81,31 @@ export const userHotelBookingDetailsController = async(req, res, next) => {
         })
     } catch (error) {
         console.log('error from user hotel booking contoller from booking service', error)
+    }
+}
+
+
+export const paymentStatusUpdateController = async(req, res, next) => {
+    try {
+        const { bookingId } = req.body
+            // console.log('abc', req.user.id)
+        const response = await paymentStatusUpdateService({ bookingId, userId: req.user.id })
+        if (response.status) {
+            return res.status(201).json({
+                success: true,
+                message: "Payment Successful",
+                payment: response
+            })
+        }
+        return res.status(402).json({
+            success: false,
+            message: "Error",
+            payment: "Error"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Payment fail and error is from payment status update controller",
+        })
     }
 }

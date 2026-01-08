@@ -1,8 +1,8 @@
 // import { Consumer, Producer } from "kafkajs"
 import pkg from 'kafkajs';
 const { Consumer, Producer } = pkg
-import { connectProducer, connectConsumer, subscribe, publish } from "../utils/broker/message-broker.js"
-import { HandleSubsrciption } from './bookingService.js'
+import { connectProducer, connectConsumer, publish, subscribe } from "../utils/message-broker.js"
+import { HandleSubsrciption } from './paymentService.js'
 
 export const InitiallizeBroker = async() => {
 
@@ -19,21 +19,21 @@ export const InitiallizeBroker = async() => {
         console.log("Order Service Consumer connected sucessfully")
     })
 
-    // ["BookingEvents", "PaymentSuccessEvents"]
+
     //Keep listining the consumer events 
     //Perform the action based on events
-    // await subscribe(HandleSubsrciption, "HotelEvents")
-    // await subscribe(HandleSubsrciption, "BookingEvents")
-    await subscribe(HandleSubsrciption, ["BookingEvents", "PaymentSuccessEvents", "PaymentCancelEvents"])
+    // await subscribe(HandleSubsrciption, "PaymentSuccessEvents")
 }
 
 
 
 //Publish Dedicated events based on use Cases
-export const SendCreateOrderMessage = async() => {
+export const PaymentSuccess = async(data) => {
+    // console.log(data)
     await publish({
-        event: 'create-order',
-        topic: "HotelEvents",
+        event: 'payment-completed',
+        // topic: "HotelEvents",
+        topic: "PaymentSuccessEvents",
         headers: {},
         message: data
     })
@@ -41,10 +41,10 @@ export const SendCreateOrderMessage = async() => {
 
 
 //Send order cancel events from hotel service
-export const SendOrderCancel = async() => {
+export const PaymentCancel = async(data) => {
     await publish({
-        event: 'cancel-order',
-        topic: "HotelEvents",
+        event: 'payment-cancel',
+        topic: "PaymentCancelEvents",
         headers: {},
         message: data
     })

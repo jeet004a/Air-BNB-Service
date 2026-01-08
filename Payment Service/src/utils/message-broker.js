@@ -1,24 +1,23 @@
-// import { Consumer, Kafka, logLevel, Partitioners, Producer } from "kafkajs";
-import pkg from 'kafkajs';
-const { Consumer, Kafka, logLevel, Partitioners, Producer } = pkg
+import pkg from 'kafkajs'
+const { Consumer, Kafka, Producer, logLevel, Partitioners } = pkg
 
 
-const CLIENT_ID = "booking-service"
-const GROUP_ID = 'booking-service-group'
+const CLIENT_ID = "payment-service"
+const GROUP_ID = 'payment-service-group'
 const BROKER = ['localhost:9092']
 
 const kafka = new Kafka({
     clientId: CLIENT_ID,
     brokers: BROKER,
-    loglevel: logLevel.info,
+    logLevel: logLevel.INFO,
     retry: {
         retries: 5,
         initialRetryTime: 300,
     }
 })
 
-let producer = null;
-let consumer = null;
+let producer = null
+let consumer = null
 
 const createTopic = async(topic) => {
     const topics = topic.map((t) => ({
@@ -30,7 +29,6 @@ const createTopic = async(topic) => {
     const admin = kafka.admin()
 
     await admin.connect()
-
     const topicExists = await admin.listTopics()
 
     console.log('topicExists', topicExists)
@@ -43,13 +41,14 @@ const createTopic = async(topic) => {
     }
 
     await admin.disconnect()
-
 }
 
 
 
+
+
 export const connectProducer = async() => {
-    await createTopic(["HotelEvents"])
+    await createTopic(["PaymentSuccessEvents", "PaymentCancelEvents"])
 
     if (producer) {
         console.log("producer already connected with existing connection")
@@ -77,7 +76,10 @@ const disconnectProducer = async() => {
 
 
 export const publish = async(data) => {
+    // await connectProducer()
     const producer = await connectProducer();
+    // const producer = await producer.connect()
+    // console.log('xxx', data.message, data.topic, data.event, data.headers)
     const result = await producer.send({
         topic: data.topic,
         messages: [{
@@ -86,8 +88,10 @@ export const publish = async(data) => {
             value: JSON.stringify(data.message)
         }]
     })
+
     console.log('Publishing result', result)
     return result.length > 0
+        // return 1
 }
 
 
@@ -117,10 +121,7 @@ const disconnectConsumer = async() => {
 
 export const subscribe = async(messageHandler, topic) => {
     const consumer = await connectConsumer();
-    // await consumer.subscribe({ topic: topic, fromBeginning: true })
-    for (let t of topic) {
-        await consumer.subscribe({ topic: t, fromBeginning: true })
-    }
+    await consumer.subscribe({ topic: topic, fromBeginning: true })
 
     await consumer.run({
         eachMessage: async({ topic, partition, message }) => {

@@ -1,0 +1,27 @@
+{
+    "name": "payment-service",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon src/app.js",
+        "db:generate": "drizzle-kit generate",
+        "db:push": "drizzle-kit push"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.0",
+        "drizzle-kit": "^0.31.4",
+        "drizzle-orm": "^0.44.3",
+        "express": "^5.1.0",
+        "kafkajs": "^2.2.4",
+        "nodemon": "^3.1.10",
+        "pg": "^8.16.3",
+        "uuid": "^11.1.0"
+    }
+}

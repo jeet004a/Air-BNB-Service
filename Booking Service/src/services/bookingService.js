@@ -42,17 +42,7 @@ export const adminhotelBookingDetailsService = async(payload) => {
 }
 
 
-//below function is handle the kafka subscription - 'create-order'
-export const HandleSubsrciption = async(message) => {
-    try {
-        if (message.event == 'create-order') {
-            await createOrderService(message.data)
-        }
-        console.log('Message received by order Kafka consumer', message)
-    } catch (error) {
-        console.log('error from Handle Subsription service', error)
-    }
-}
+
 
 
 export const userHotelBookingDetailsService = async(payload) => {
@@ -66,4 +56,54 @@ export const userHotelBookingDetailsService = async(payload) => {
         console.log('error from user hotel booking details service from booking service', error)
     }
 
+}
+
+
+//below function is to update the payment status booking db
+export const paymentStatusUpdateService = async(payload) => {
+    try {
+        const rec = await bookingDB.execute(sql `select * from bookings where id=${payload.bookingId}`)
+        if (rec.rows[0].payment_status == 'completed') {
+            return {
+                status: true,
+                message: "This order Payment already completed"
+            }
+        } else {
+            const response = await bookingDB.execute(sql `update bookings set payment_status=${payload.paymentStatus} where id=${payload.bookingId}`)
+            if (response.rowCount > 0) {
+                return {
+                    status: true,
+                    message: "Payment Completed"
+                }
+            }
+        }
+
+        // const response = await bookingDB.execute(sql `update bookings set payment_status='pending' where id=${payload.bookingId} `)
+
+        return false
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+
+
+
+//below function is handle the kafka subscription - 'create-order'
+export const HandleSubsrciption = async(message) => {
+    try {
+        if (message.event == 'create-order') {
+            await createOrderService(message.data)
+        } else if (message.event == "payment-completed") {
+            await paymentStatusUpdateService({ bookingId: message.data.bookingId, paymentStatus: message.data.paymentStatus })
+            console.log('Order Update successfully', message.data.bookingId)
+        } else if (message.event == "payment-cancel") {
+            await paymentStatusUpdateService({ bookingId: message.data.bookingId, paymentStatus: message.data.paymentStatus })
+            console.log('Order Canceled successfully', message.data.bookingId)
+        }
+        console.log('Message received by order Kafka consumer', message)
+    } catch (error) {
+        console.log('error from Handle Subsription service', error)
+    }
 }
