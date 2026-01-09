@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "profile_image" varchar(500) DEFAULT 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=60';

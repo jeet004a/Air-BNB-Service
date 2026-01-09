@@ -6,7 +6,7 @@ export const roomController = async(req, res, next) => {
         const { email } = req.user
 
         const response = await createRoomService({...req.body, email })
-        console.log(response)
+        console.log('abc', response)
         if (!response) {
             return res.status(400).json({
                 success: false,
@@ -74,84 +74,258 @@ export const adminRoomValidationController = async(req, res, next) => {
 
 
 //Elastic Search controller
-export const elasticSearchController = async(req, res) => {
-    const { q, city, roomType, minPrice, maxPrice } = req.query;
+// export const elasticSearchController = async(req, res) => {
+//     const { q, city, roomType, minPrice, maxPrice } = req.query;
+//     console.log('minPrice', minPrice)
 
-    const filters = [];
+//     const filters = [];
 
-    // City filter
-    if (city) {
-        filters.push({
-            term: {
-                city: city.toLowerCase()
-            }
-        });
-    }
+//     // City filter
+//     if (city) {
+//         filters.push({
+//             term: {
+//                 city: city.toLowerCase()
+//             }
+//         });
+//     }
 
-    // Nested room filters
-    const nestedRoomFilters = [];
+//     // Nested room filters
+//     const nestedRoomFilters = [];
 
-    if (roomType) {
-        nestedRoomFilters.push({
-            term: {
-                'rooms.roomType': roomType
-            }
-        });
-    }
+//     if (roomType) {
+//         nestedRoomFilters.push({
+//             term: {
+//                 'rooms.roomType': roomType
+//             }
+//         });
+//     }
 
-    if (minPrice || maxPrice) {
-        nestedRoomFilters.push({
-            range: {
-                'rooms.PPN': {
-                    gte: minPrice ? parseInt(minPrice) : undefined,
-                    lte: maxPrice ? parseInt(maxPrice) : undefined
-                }
-            }
-        });
-    }
+//     if (minPrice || maxPrice) {
+//         nestedRoomFilters.push({
+//             range: {
+//                 'rooms.PPN': {
+//                     gte: minPrice ? parseInt(minPrice) : undefined,
+//                     lte: maxPrice ? parseInt(maxPrice) : undefined
+//                 }
+//             }
+//         });
+//     }
 
+//     // const rangeFilter = {};
+//     // if (minPrice) rangeFilter.gte = parseInt(minPrice, 10);
+//     // if (maxPrice) rangeFilter.lte = parseInt(maxPrice, 10);
+
+//     // if (Object.keys(rangeFilter).length > 0) {
+//     //     nestedRoomFilters.push({
+//     //         range: { 'rooms.PPN': rangeFilter }
+//     //     });
+//     // }
+
+//     try {
+//         const result = await client.search({
+//             index: 'hotels',
+//             query: {
+//                 bool: {
+//                     must: q ? [{
+//                         multi_match: {
+//                             query: q,
+//                             fields: ['name', 'description', 'rooms.description'],
+//                             fuzziness: 'AUTO'
+//                         }
+//                     }] : [],
+//                     filter: [
+//                         ...filters,
+//                         ...(nestedRoomFilters.length > 0 ? [{
+//                             nested: {
+//                                 path: 'rooms',
+//                                 query: {
+//                                     bool: {
+//                                         filter: nestedRoomFilters
+//                                     }
+//                                 }
+//                             }
+//                         }] : [])
+//                     ]
+//                 }
+//             }
+//         });
+
+//         const hits = result.hits.hits.map(hit => hit._source);
+
+//         return res.status(200).json({
+//             success: true,
+//             message: 'Search successful',
+//             data: hits
+//         });
+//     } catch (error) {
+//         console.error('Search failed:', error);
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Search failed',
+//             //   error: error.message
+//         });
+//     }
+// }
+
+
+//Nornal Search Feature
+// export async function elasticSearchController(req, res, next) {
+//     try {
+//         const query = req.query.q;
+//         if (!query) {
+//             return res.status(400).json({ error: "Missing search query ?q=" });
+//         }
+
+//         const isNumeric = !isNaN(query);
+
+//         const esQuery = {
+//             index: "hotels",
+//             body: {
+//                 query: {
+//                     bool: {
+//                         should: [{
+//                                 match: {
+//                                     name: {
+//                                         query,
+//                                         fuzziness: "AUTO"
+//                                     }
+//                                 }
+//                             },
+//                             {
+//                                 match: {
+//                                     description: {
+//                                         query,
+//                                         fuzziness: "AUTO"
+//                                     }
+//                                 }
+//                             },
+//                             {
+//                                 nested: {
+//                                     path: "rooms",
+//                                     query: {
+//                                         match: {
+//                                             "rooms.description": {
+//                                                 query,
+//                                                 fuzziness: "AUTO"
+//                                             }
+//                                         }
+//                                     }
+//                                 }
+//                             },
+//                             ...(isNumeric ?
+//                                 [{
+//                                     nested: {
+//                                         path: "rooms",
+//                                         query: {
+//                                             term: { "rooms.PPN": parseInt(query, 10) }
+//                                         }
+//                                     }
+//                                 }] :
+//                                 [])
+//                         ],
+//                         minimum_should_match: 1
+//                     }
+//                 }
+//             }
+//         };
+
+//         const result = await client.search(esQuery);
+
+//         return res.json({
+//             total: result.hits.total.value,
+//             hotels: result.hits.hits.map(hit => ({
+//                 id: hit._id,
+//                 ...hit._source
+//             }))
+//         });
+//     } catch (err) {
+//         console.error("❌ Search failed:", err);
+//         return res.status(500).json({ error: "Search failed", details: err.message });
+//     }
+// }
+
+
+//Below search query if inner hits matchs 
+
+export const elasticSearchController = async(req, res, next) => {
     try {
-        const result = await client.search({
-            index: 'hotels',
-            query: {
-                bool: {
-                    must: q ? [{
-                        multi_match: {
-                            query: q,
-                            fields: ['name', 'description', 'rooms.description'],
-                            fuzziness: 'AUTO'
-                        }
-                    }] : [],
-                    filter: [
-                        ...filters,
-                        ...(nestedRoomFilters.length > 0 ? [{
-                            nested: {
-                                path: 'rooms',
-                                query: {
-                                    bool: {
-                                        filter: nestedRoomFilters
+        const query = req.query.q;
+        if (!query) {
+            return res.status(400).json({ error: "Missing search query ?q=" });
+        }
+
+        const isNumeric = !isNaN(query);
+
+        const esQuery = {
+            index: "hotels",
+            body: {
+                query: {
+                    bool: {
+                        should: [{
+                                match: {
+                                    name: {
+                                        query,
+                                        fuzziness: "AUTO"
+                                    }
+                                }
+                            },
+                            {
+                                match: {
+                                    description: {
+                                        query,
+                                        fuzziness: "AUTO"
+                                    }
+                                }
+                            },
+                            {
+                                nested: {
+                                    path: "rooms",
+                                    query: {
+                                        bool: {
+                                            should: [{
+                                                    match: {
+                                                        "rooms.description": {
+                                                            query,
+                                                            fuzziness: "AUTO"
+                                                        }
+                                                    }
+                                                },
+                                                ...(isNumeric ? [{
+                                                    term: { "rooms.PPN": parseInt(query, 10) }
+                                                }] : [])
+                                            ]
+                                        }
+                                    },
+                                    inner_hits: {
+                                        _source: ["id", "roomType", "PPN", "max_guests", "description"]
                                     }
                                 }
                             }
-                        }] : [])
-                    ]
+                        ],
+                        minimum_should_match: 1
+                    }
                 }
             }
-        });
+        };
 
-        const hits = result.hits.hits.map(hit => hit._source);
+        const result = await client.search(esQuery)
 
-        return res.status(200).json({
-            success: true,
-            message: 'Search successful',
-            data: hits
+        console.log(result.hits.hits[0].inner_hits.rooms.hits.hits)
+
+        return res.json({
+            total: result.hits.total.value,
+            hotels: result.hits.hits.map(hit => ({
+                id: hit._id,
+                hotel: {
+                    name: hit._source.name,
+                    city: hit._source.city,
+                    description: hit._source.description
+                },
+                matchingRooms: hit.inner_hits.rooms.hits.hits.map(r => r._source) || []
+            }))
         });
-    } catch (error) {
-        console.error('Search failed:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Search failed',
-            //   error: error.message
-        });
+    } catch (err) {
+        console.error("❌ Search failed:", err);
+        return res.status(500).json({ error: "Search failed", details: err.message });
     }
 }

@@ -40,6 +40,7 @@ export const signUpController = async(req, res, next) => {
 
 export const signInController = async(req, res, next) => {
     try {
+        // console.log(req.body)
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(400).json({
@@ -70,8 +71,10 @@ export const signInController = async(req, res, next) => {
 
 export const userProfile = async(req, res, next) => {
     try {
-        const userDetails = await userDB.execute(sql `select * from users where email=${req.user.email} `)
-            // console.log()
+        //If you want to grab all details user below query
+        // const userDetails = await userDB.execute(sql `select * from users where email=${req.user.email} `)
+        // console.log()
+        const userDetails = await userDB.execute(sql `select id,firstname,lastname,email from users where email=${req.user.email} `)
         return res.status(200).json({
             success: true,
             message: "User profile fetched successfully",
@@ -80,5 +83,58 @@ export const userProfile = async(req, res, next) => {
         })
     } catch (error) {
         console.log('error in userProfile:', error);
+    }
+}
+
+
+export const userInfoController = async(req, res, next) => {
+    try {
+        const { id } = req.params
+
+        const response = await userDB.execute(`select id, email,firstname,lastname,created_at from users where id=${id}`)
+            // console.log(response.rows)
+        if (response.rows.length > 0) {
+            return res.status(200).json({
+                success: true,
+                msg: 'Msg from server',
+                data: response.rows[0]
+            })
+        }
+        return res.status(400).json({
+            success: false,
+            msg: `User is not found by id ${id}`
+        })
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            msg: "Something went wrong"
+        })
+    }
+}
+
+export const userUpdateController = async(req, res, next) => {
+    try {
+        const { firstname, lastname } = req.body
+        const response = await userDB.execute(sql `update users set firstname=${firstname} , lastname=${lastname} where email=${req.user.email} RETURNING id,firstname,lastname,email,created_at`)
+
+        if (response.rows.length > 0) {
+            return res.status(200).json({
+                success: true,
+                msg: 'User Info updated successfully',
+                data: response.rows[0]
+            })
+        }
+
+        return res.status(400).json({
+            success: false,
+            msg: 'User is not updated successfully'
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({
+            success: false,
+            msg: "Something went wrong while updating the User",
+            error
+        })
     }
 }

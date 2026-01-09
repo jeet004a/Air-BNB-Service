@@ -6,6 +6,8 @@ import roomRoutes from './routes/roomRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
 import { InitiallizeBroker } from './services/brokerService.js'
 import { createHotelRoomIndex } from './elasticSearch/hotelRoomIndexService.js'
+import elasticRoute from './routes/elastickCreateIndexRoute.js'
+import cors from 'cors'
 config()
 const PORT = process.env.PORT || 3002
 const app = express()
@@ -23,9 +25,9 @@ app.get('/', (req, res, next) => {
 })
 
 app.use(express.json())
-
-//Kafka initialization
-await InitiallizeBroker()
+app.use(cors())
+    //Kafka initialization
+    // await InitiallizeBroker()
 
 //admin routes
 app.use('/api/v1/admin', adminRoutes)
@@ -38,6 +40,8 @@ app.use('/api/v1/room', roomRoutes)
 
 //Booking Routes
 app.use('/api/v1/bookings', bookingRoutes)
+
+app.use('/api/v1/elastic', elasticRoute)
 
 
 app.get('/', (req, res) => {

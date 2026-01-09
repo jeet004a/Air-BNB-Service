@@ -1,5 +1,5 @@
-import { manager, hotel, room, bookingDetails } from '../schema/hotelSchema.js'
-import { ManagerDB, HotelDB, RoomDB, HotelBookings } from '../DB/dbConnection.js'
+import { manager, hotel, bookingDetails } from '../schema/hotelSchema.js'
+import { ManagerDB, HotelDB, HotelBookings } from '../DB/dbConnection.js'
 import { SendCreateOrderMessage } from './brokerService.js'
 import { sql, eq } from 'drizzle-orm'
 import omit from 'lodash';

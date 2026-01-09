@@ -1,0 +1,1 @@
+ALTER TABLE "manager" ADD COLUMN "entries" numeric DEFAULT 0;
