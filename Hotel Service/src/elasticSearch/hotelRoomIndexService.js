@@ -1,6 +1,6 @@
 import client from './elasticSearchService.js'
 
-export async function createHotelRoomIndex() {
+export const createHotelRoomIndex = async() => {
     // await client.indices.delete({ index: 'hotels' })
     const exists = await client.indices.exists({ index: 'hotels' });
     if (!exists.body) {
@@ -63,8 +63,16 @@ export async function createHotelRoomIndex() {
 export async function indexHotelWithRooms(hotel, newRoom) {
     const hotelId = hotel.id.toString();
 
+    // 🟢 Flatten in case newRoom comes as [ [ { ... } ] ]
+    const normalizedRooms = newRoom.flat().map(room => ({
+        id: room.id,
+        roomType: room.roomType,
+        PPN: room.PPN,
+        max_guests: room.max_guests,
+        description: room.description
+    }));
+
     try {
-        // 1. Check if hotel exists
         const result = await client.get({
             index: 'hotels',
             id: hotelId
@@ -72,15 +80,12 @@ export async function indexHotelWithRooms(hotel, newRoom) {
 
         const existingHotel = result._source;
 
-        // 2. Filter out same room ID if exists (for updates)
-        const updatedRooms = existingHotel.rooms.filter(
-            room => room.id !== newRoom[0].id
-        );
+        // merge old + new, removing duplicates by room id
+        const updatedRooms = [
+            ...existingHotel.rooms.filter(r => !normalizedRooms.some(nr => nr.id === r.id)),
+            ...normalizedRooms
+        ];
 
-        // 3. Add new room
-        updatedRooms.push(newRoom[0]);
-
-        // 4. Index back full document (with all rooms)
         await client.index({
             index: 'hotels',
             id: hotelId,
@@ -93,10 +98,9 @@ export async function indexHotelWithRooms(hotel, newRoom) {
             }
         });
 
-        console.log(`✅ Room ${newRoom[0].id} added to hotel ${hotelId}`);
+        console.log(`✅ Rooms added to hotel ${hotelId}`);
     } catch (err) {
         if (err.meta.statusCode === 404) {
-            // Hotel doesn't exist → create new document
             await client.index({
                 index: 'hotels',
                 id: hotelId,
@@ -105,11 +109,10 @@ export async function indexHotelWithRooms(hotel, newRoom) {
                     name: hotel.name,
                     city: hotel.city,
                     description: hotel.description,
-                    rooms: [newRoom]
+                    rooms: normalizedRooms
                 }
             });
-
-            console.log(`✅ Hotel ${hotelId} created with room ${newRoom.id}`);
+            console.log(`✅ Hotel ${hotelId} created with rooms`);
         } else {
             console.error('❌ Failed to add or update room:', err);
             throw err;

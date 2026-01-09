@@ -1,5 +1,5 @@
-import { manager, hotel, room } from '../schema/hotelSchema.js'
-import { ManagerDB, HotelDB, RoomDB } from '../DB/dbConnection.js'
+import { manager, hotel } from '../schema/hotelSchema.js'
+import { ManagerDB, HotelDB } from '../DB/dbConnection.js'
 import { sql } from 'drizzle-orm'
 import client from '@elastic/elasticsearch'
 import { indexHotelWithRooms } from '../elasticSearch/hotelRoomIndexService.js'
@@ -13,13 +13,14 @@ export const createRoomService = async(payload) => {
             // const response = await RoomDB.insert(room).values(payload).returning()
             // console.log(admin.rows[0])
         const hotel = await HotelDB.execute(sql `select * from hotel h where h.id=${payload.hotelId}`)
-
-        //Implementation Start for create room
+        console.log(hotel.rows[0])
+            //Implementation Start for create room
         if (admin.rows[0].room_capacity > 0) {
             if (payload.roomType === 'single' && payload.max_guests < 3) {
                 const response = await RoomDB.insert(room).values(payload).returning()
                 await HotelDB.execute(sql `update hotel set room_capacity=room_capacity-1 where id=${admin.rows[0].id}`)
                 await indexHotelWithRooms(hotel.rows[0], response)
+                console.log('xyz')
                 return 'Room created successfully with id: ' + response[0].id; // Room 
             } else if (payload.roomType === 'double' && payload.max_guests > 2) {
                 const response = await RoomDB.insert(room).values(payload).returning()
@@ -33,9 +34,10 @@ export const createRoomService = async(payload) => {
         //Implementation End for create room
 
 
-        return false // No room capacity left
+        return true // No room capacity left
     } catch (error) {
-        console.log('Error in create room service', error);
+        console.log('Error in create room service', error)
+        return false
     }
 }
 

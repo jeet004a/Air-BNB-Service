@@ -1,21 +1,23 @@
-import { manager, hotel, room } from '../schema/hotelSchema.js'
-import { ManagerDB, HotelDB, RoomDB } from '../DB/dbConnection.js'
+import { manager, hotel } from '../schema/hotelSchema.js'
+import { ManagerDB, HotelDB } from '../DB/dbConnection.js'
 import { eq, sql } from 'drizzle-orm'
 
 export const createHotelService = async(req, host_id) => {
     try {
+        // console.log('hotel', req.body)
         // const response = await
-        const data = {
-            name: req.body.name,
-            description: req.body.description,
-            roomCapacity: req.body.roomCapacity,
-            address: req.body.address,
-            city: req.body.city,
-            country: req.body.country,
-            pincode: req.body.pincode,
-            hostId: host_id
-        }
-        const response = await HotelDB.insert(hotel).values(data).returning()
+        // const data = {
+        //     name: req.body.name,
+        //     description: req.body.description,
+        //     roomCapacity: req.body.roomCapacity,
+        //     address: req.body.address,
+        //     city: req.body.city,
+        //     country: req.body.country,
+        //     pincode: req.body.pincode,
+        //     hostId: host_id
+        // }
+        const response = await HotelDB.insert(hotel).values(req.body).returning()
+        await ManagerDB.execute(sql `update manager set entries=entries+1 where id=${req.body.hostId}`)
             // console.log(response)
         if (response.length > 0) {
             return response; // Hotel created successfully
@@ -39,5 +41,20 @@ export const updateRoomCapacityService = async(payload) => {
         }
     } catch (error) {
         console.log('Error in updateRoomCapacityService:', error);
+    }
+}
+
+
+export const hotelDetailsByIdService = async(hotelId) => {
+    try {
+        // console.log(hotelId)
+        const response = await HotelDB.execute(sql `select * from hotel where id=${hotelId}`)
+        if (response.rows.length > 0) {
+            return response.rows
+        }
+        return false
+    } catch (error) {
+        console.log('Error in updateRoomCapacityService:', error)
+        return false
     }
 }

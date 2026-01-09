@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, integer, pgEnum, date } from 'drizzle-orm/pg-core'
+import { pgTable, serial, varchar, text, timestamp, integer, real, pgEnum, date, numeric } from 'drizzle-orm/pg-core'
 
 export const manager = pgTable('manager', {
     id: serial('id').primaryKey(),
@@ -6,6 +6,7 @@ export const manager = pgTable('manager', {
     email: varchar('email', { length: 255 }).notNull().unique(),
     password: varchar('password').notNull(),
     salt: varchar('salt').notNull(),
+    entries: numeric('entries').default(0),
     phone: varchar('phone', { length: 15 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
@@ -13,47 +14,63 @@ export const manager = pgTable('manager', {
 
 export const hotel = pgTable('hotel', {
     id: serial('id').primaryKey(),
-    name: varchar('name', { length: 255 }).notNull(),
+    title: varchar('name', { length: 255 }).notNull(),
     description: varchar('description', { length: 255 }).notNull(),
     address: varchar('address', { length: 255 }).notNull(),
     city: varchar('city', { length: 255 }).notNull(),
     country: varchar('country', { length: 255 }).notNull(),
     pincode: varchar('pincode', { length: 10 }).notNull(),
-    roomCapacity: integer('room_capacity').notNull().default(0),
+    // roomCapacity: integer('room_capacity').notNull().default(0),
+
     hostId: integer('host_id').references(() => manager.id, { onDelete: 'cascade' }).notNull(),
+
+    // 🏷️ New fields below
+    price: numeric('price', { precision: 10, scale: 2 }).notNull().default('0.00'),
+    rating: real('rating').notNull().default(0),
+    reviews: integer('reviews').notNull().default(0),
+    type: varchar('type', { length: 100 }).notNull().default('Room'),
+
+    bedrooms: integer('bedrooms').notNull().default(1),
+    beds: integer('beds').notNull().default(1),
+    bathrooms: real('bathrooms').notNull().default(1),
+
+    // 🧺 Array fields for amenities, highlights, and images
+    amenities: text('amenities').array().default([]).notNull(),
+    highlights: text('highlights').array().default([]).notNull(),
+    images: text('images').array().default([]).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
 })
 
 // Define the enum for room type
-export const roomTypeEnum = pgEnum("room_type_enum", ["single", "double", "family"]);
-export const roomBookedStatus = pgEnum("room_booked_status_enum", ["available", "booked", "maintenance"]);
+// export const roomTypeEnum = pgEnum("room_type_enum", ["single", "double", "family"]);
+// export const roomBookedStatus = pgEnum("room_booked_status_enum", ["available", "booked", "maintenance"]);
 
-export const room = pgTable('room', {
-    id: serial('id').primaryKey(),
-    hotelId: integer('hotel_id').references(() => hotel.id, { onDelete: 'cascade' }).notNull(),
-    roomType: roomTypeEnum('room_type').notNull(),
-    PPN: integer('ppn').notNull(),
-    max_guests: integer('max_guests').notNull(),
-    description: text('description').notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow()
-})
+// export const room = pgTable('room', {
+//     id: serial('id').primaryKey(),
+//     hotelId: integer('hotel_id').references(() => hotel.id, { onDelete: 'cascade' }).notNull(),
+//     roomType: roomTypeEnum('room_type').notNull(),
+//     PPN: integer('ppn').notNull(),
+//     max_guests: integer('max_guests').notNull(),
+//     description: text('description').notNull(),
+//     createdAt: timestamp("created_at").notNull().defaultNow(),
+//     updatedAt: timestamp("updated_at").notNull().defaultNow()
+// })
 
-export const roomImages = pgTable('room_images', {
-    id: serial('id').primaryKey(),
-    roomId: integer('room_id').references(() => room.id, { onDelete: 'cascade' }).notNull(),
-    imageUrl: varchar('image_url', { length: 255 }).notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow()
-})
+// export const roomImages = pgTable('room_images', {
+//     id: serial('id').primaryKey(),
+//     roomId: integer('room_id').references(() => room.id, { onDelete: 'cascade' }).notNull(),
+//     imageUrl: varchar('image_url', { length: 255 }).notNull(),
+//     createdAt: timestamp("created_at").notNull().defaultNow(),
+//     updatedAt: timestamp("updated_at").notNull().defaultNow()
+// })
 
 
 export const bookingDetails = pgTable('booking_details', {
     id: serial('id').primaryKey(),
     userId: integer('user_id').notNull(),
     hotelId: integer('hotel_id').references(() => hotel.id, { onDelete: 'cascade' }).notNull(),
-    roomId: integer('room_id').references(() => room.id, { onDelete: 'cascade' }).notNull(),
+    // roomId: integer('room_id').references(() => room.id, { onDelete: 'cascade' }).notNull(),
     checkIn: date('check_in').notNull(),
     checkOut: date('check_out').notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -44,6 +44,7 @@ export const adminSignUpController = async(req, res, next) => {
 
 export const adminSignInController = async(req, res, next) => {
     try {
+
         const existingAdmin = await ManagerDB.select().from(manager).where(eq(manager.email, req.body.email))
         if (!existingAdmin || existingAdmin.length === 0) {
             return res.status(400).json({
